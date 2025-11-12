@@ -25,9 +25,23 @@
   };
   const formRef = ref<IUserProfile>(initialValues);
 
+  /* 
+    onMounted used to load saved profile on initial page load 
+    and initialize watch function of formRef changes
+  */
   onMounted(() => {
     onLoadProfile();
 
+    /* 
+      This watch function is to listen to every properties formRef 
+      changes and run the onSaveForm function to save the changes
+      automatically after 2 seconds debounce of user input.
+
+      This watcher is initialized inside the onMounted to
+      prevent running on first value changes from onLoadProfile 
+      function and start listening to formRef after the first 
+      init of user profile load
+    */
     watch(formRef, onSaveForm, {
       deep: true,
     });
