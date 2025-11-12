@@ -3,7 +3,7 @@ import type { IUserProfile } from "../interfaces/UserProfile";
 export const PROFILE_STORE_KEY = "user_profile";
 
 export const getProfile = (): IUserProfile => {
-  const profile: string = localStorage.getItem(PROFILE_STORE_KEY) || "";
+  const profile: string = localStorage.getItem(PROFILE_STORE_KEY) || "{}";
   const parsedProfile: IUserProfile = JSON.parse(profile);
 
   return parsedProfile;
