@@ -65,7 +65,7 @@
       toast.add({
         life: 3000,
         summary: "Saved",
-        detail: "Prfile has been successfully updated!",
+        detail: "Profile has been successfully updated!",
         severity: "success",
       });
     },
