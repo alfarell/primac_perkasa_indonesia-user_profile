@@ -1,9 +1,12 @@
 <script setup lang="ts">
-  import { InputText, Textarea } from "primevue";
   import { ref, watch, type WatchCallback } from "vue";
-  import type { IUserProfile } from "../../interfaces/UserProfile";
+  import { InputText, Textarea, Toast } from "primevue";
   import debounce from "debounce";
+  import { useToast } from "primevue/usetoast";
   import { saveProfile } from "../../service/ProfileService";
+  import type { IUserProfile } from "../../interfaces/UserProfile";
+
+  const toast = useToast();
 
   const initialValues: IUserProfile = {
     first_name: "",
@@ -12,12 +15,17 @@
     phone: "",
     address: "",
   };
-
   const formRef = ref<IUserProfile>(initialValues);
 
   const onValueChange = debounce<WatchCallback<IUserProfile, IUserProfile>>(
     (values) => {
       saveProfile(values);
+      toast.add({
+        life: 2000,
+        summary: "Saved",
+        detail: "Prfile has been successfully updated!",
+        severity: "success",
+      });
     },
     2000
   );
@@ -88,4 +96,5 @@
       />
     </div>
   </form>
+  <Toast />
 </template>
