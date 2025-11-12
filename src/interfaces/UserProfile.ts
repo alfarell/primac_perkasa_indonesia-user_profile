@@ -4,4 +4,5 @@ export interface IUserProfile {
   email: string;
   phone: string;
   address: string;
+  picture: string;
 }

@@ -1,6 +1,13 @@
 <script setup lang="ts">
   import { onMounted, ref, watch, type WatchCallback } from "vue";
-  import { InputText, Textarea, Toast } from "primevue";
+  import {
+    Avatar,
+    FileUpload,
+    InputText,
+    Textarea,
+    Toast,
+    type FileUploadSelectEvent,
+  } from "primevue";
   import debounce from "debounce";
   import { useToast } from "primevue/usetoast";
   import { getProfile, saveProfile } from "../../service/ProfileService";
@@ -14,15 +21,24 @@
     email: "",
     phone: "",
     address: "",
+    picture: "",
   };
   const formRef = ref<IUserProfile>(initialValues);
+
+  onMounted(() => {
+    onLoadProfile();
+
+    watch(formRef, onSaveForm, {
+      deep: true,
+    });
+  });
 
   const onLoadProfile = () => {
     const profile = getProfile();
     if (profile) formRef.value = profile;
   };
 
-  const onFormChanged = debounce<WatchCallback<IUserProfile, IUserProfile>>(
+  const onSaveForm = debounce<WatchCallback<IUserProfile, IUserProfile>>(
     (values) => {
       toast.add({
         life: 3000,
@@ -42,23 +58,47 @@
     2000
   );
 
-  onMounted(() => {
-    onLoadProfile();
+  const onUploadPicture = (event: FileUploadSelectEvent) => {
+    const file = event.files[0];
+    const reader = new FileReader();
 
-    watch(formRef, onFormChanged, {
-      deep: true,
-    });
-  });
+    reader.onload = (e) => {
+      formRef.value.picture = e?.target?.result as string;
+    };
+
+    reader.readAsDataURL(file);
+  };
 </script>
 
 <template>
   <h2 class="text-xl font-semibold text-primary-foreground mb-8">My Profile</h2>
   <div class="mb-8 flex max-md:justify-center">
-    <img
-      src="https://media.licdn.com/dms/image/v2/D5603AQG5q11u0ngVVA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1690183020804?e=1764201600&v=beta&t=F3N0t2B2vsDqfA1lElIvE348yt3lczaLC3xjlLiCHD8"
-      alt="user-avatar"
-      class="min-w-20 min-h-20 w-full h-full max-w-50 max-h-50 aspect-square rounded-full"
-    />
+    <div
+      class="relative min-w-20 min-h-20 w-full h-full max-w-50 max-h-50 aspect-square rounded-full overflow-hidden"
+    >
+      <img v-if="formRef.picture" :src="formRef.picture" alt="user-avatar" />
+      <Avatar
+        v-if="!formRef.picture"
+        icon="pi pi-user"
+        class="w-full! h-full!"
+        size="xlarge"
+        shape="circle"
+      />
+      <div
+        class="group absolute bottom-0 left-0 right-0 top-0 flex flex-col items-center justify-center gap-2 w-full h-full hover:bg-gray-800/50"
+      >
+        <FileUpload
+          choose-label="Edit Picture"
+          choose-icon="pi pi-pencil"
+          mode="basic"
+          @select="onUploadPicture"
+          customUpload
+          auto
+          severity="secondary"
+          class="m-auto whitespace-nowrap bg-primary/60! rounded flex gap-2 items-center invisible group-hover:visible"
+        />
+      </div>
+    </div>
   </div>
   <form class="grid grid-cols-2 max-md:flex max-md:flex-col gap-4">
     <div class="flex flex-col gap-1">
@@ -114,5 +154,6 @@
       />
     </div>
   </form>
+
   <Toast />
 </template>
