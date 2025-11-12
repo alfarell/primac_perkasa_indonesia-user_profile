@@ -1,9 +1,9 @@
 <script setup lang="ts">
-  import { ref, watch, type WatchCallback } from "vue";
+  import { onMounted, ref, watch, type WatchCallback } from "vue";
   import { InputText, Textarea, Toast } from "primevue";
   import debounce from "debounce";
   import { useToast } from "primevue/usetoast";
-  import { saveProfile } from "../../service/ProfileService";
+  import { getProfile, saveProfile } from "../../service/ProfileService";
   import type { IUserProfile } from "../../interfaces/UserProfile";
 
   const toast = useToast();
@@ -17,11 +17,23 @@
   };
   const formRef = ref<IUserProfile>(initialValues);
 
-  const onValueChange = debounce<WatchCallback<IUserProfile, IUserProfile>>(
+  const onLoadProfile = () => {
+    const profile = getProfile();
+    if (profile) formRef.value = profile;
+  };
+
+  const onFormChanged = debounce<WatchCallback<IUserProfile, IUserProfile>>(
     (values) => {
-      saveProfile(values);
       toast.add({
-        life: 2000,
+        life: 3000,
+        summary: "Saving...",
+        severity: "info",
+      });
+
+      saveProfile(values);
+
+      toast.add({
+        life: 3000,
         summary: "Saved",
         detail: "Prfile has been successfully updated!",
         severity: "success",
@@ -30,7 +42,13 @@
     2000
   );
 
-  watch(formRef, onValueChange, { deep: true });
+  onMounted(() => {
+    onLoadProfile();
+
+    watch(formRef, onFormChanged, {
+      deep: true,
+    });
+  });
 </script>
 
 <template>
@@ -69,7 +87,7 @@
       <label for="email" class="text-md text-primary-foreground">Email</label>
       <InputText
         name="email"
-        type="text"
+        type="email"
         placeholder="Email"
         v-model="formRef.email"
       />
